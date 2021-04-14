@@ -8,8 +8,14 @@ const db = require('../../data/db-config.js');
     "message": "scheme with scheme_id <actual id> not found"
   }
 */
-const checkSchemeId = (req, res, next) => {
+const checkSchemeId =  async (req, res, next) => {
+  const result = await db('schemes').where('scheme_id', req.params.scheme_id).first();
 
+  if(!result) {
+    res.status(404).json({ message: `scheme with scheme_id ${req.params.scheme_id} not found` })
+  } else {
+    next();
+  }
 }
 
 /*
@@ -21,6 +27,13 @@ const checkSchemeId = (req, res, next) => {
   }
 */
 const validateScheme = (req, res, next) => {
+  const { scheme_name } = req.body;
+
+  if (!scheme_name || scheme_name === '' || (typeof scheme_name) !== 'string') {
+    res.status(404).json({ message: 'invalid scheme_name' })
+  } else {
+    next();
+  }
 
 }
 
@@ -34,7 +47,15 @@ const validateScheme = (req, res, next) => {
   }
 */
 const validateStep = (req, res, next) => {
+  const { instructions, step_number } = req.body;
 
+  if(!instructions || instructions === '' || (typeof instructions) !== 'string') {
+    res.status(400).json({ message: 'invalid step' })
+  } else if ((typeof step_number !== 'number') || step_number < 1) {
+    res.status(400).json({ message: 'invalid step' })
+  } else {
+    next();
+  }
 }
 
 module.exports = {
